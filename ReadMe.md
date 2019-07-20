@@ -5,8 +5,10 @@
 ## Usage
 
 ```
+Usage of ./erproxy-darwin:
   -c string
         set configuration file (default "config.yml")
+  -d=true   if erproxy needs to run in the background
   -l string
         set logging file (default "erproxy.log")
 ```

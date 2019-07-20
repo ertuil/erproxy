@@ -19,7 +19,7 @@ var (
 func setFlag() {
 	flag.StringVar(&logfile, "l", "erproxy.log", "set logging file")
 	flag.StringVar(&conffile, "c", "config.yml", "set configuration file")
-	flag.BoolVar(&back, "d",false,"if erproxy needs to run in the backend")
+	flag.BoolVar(&back, "d",false,"if erproxy needs to run in the background")
 	if ! flag.Parsed() {
 		flag.Parse()
 	}
