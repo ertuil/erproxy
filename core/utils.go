@@ -5,23 +5,23 @@ import (
 	"encoding/base64"
 )
 
-func isTLS() bool {
-	if conf.CC.InBound.TLS.Cert != "" && conf.CC.InBound.TLS.Key != "" {
+func isTLS(c conf.InBound) bool {
+	if c.TLS.Cert != "" && c.TLS.Key != "" {
 		return true
 	}
 	return false
 }
 
-func isAuth() bool {
-	if len(conf.CC.InBound.Auth) > 0 {
+func isAuth(c conf.InBound) bool {
+	if len(c.Auth) > 0 {
 		return true
 	}
 	return false
 }
 
-func getInAddr() (string,string) {
-	ad := conf.CC.InBound.Addr
-	pt := conf.CC.InBound.Port
+func getInAddr(c conf.InBound) (string,string) {
+	ad := c.Addr
+	pt := c.Port
 	if ad == "" {
 		ad = "0.0.0.0"
 	}
@@ -56,8 +56,8 @@ func selectMethod(a []byte,b byte) bool {
 
 
 
-func authenticate(username string, password string) bool {
-	for k,v := range(conf.CC.InBound.Auth) {
+func authenticate(username string, password string,c conf.InBound) bool {
+	for k,v := range(c.Auth) {
 		if username == k && password ==  v {
 			return true
 		}
@@ -66,8 +66,8 @@ func authenticate(username string, password string) bool {
 }
 
 // HTTPAuth .
-func HTTPAuth(token string) bool {
-	for k,v := range(conf.CC.InBound.Auth) {
+func HTTPAuth(token string,c conf.InBound) bool {
+	for k,v := range(c.Auth) {
 		if token == base64.URLEncoding.EncodeToString([]byte(k+":"+v)) {
 			return true
 		}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"flag"
+	"sync"
 	"erproxy/conf"
 	"erproxy/core"
 )
@@ -14,6 +15,7 @@ var (
 	logfile string
 	conffile string
 	back bool
+	sw sync.WaitGroup
 )
 
 func setFlag() {
@@ -62,17 +64,28 @@ func main(){
 
 	log.Printf("Erproxy start, config file: %v", conffile)
 
-	l := core.InitServer()
-	
+	for _,c := range(conf.CC.InBound) {
+		var ib core.Inbound
+		if c.Type == "socks"{
+			ib = new(core.Socks5Server)
+		} else {
+			ib = new(core.HTTPServer)
+		}
+		sw.Add(1)
+		go InBoundServerRun(ib, c)
+	}
+	sw.Wait()
+}
+
+// InBoundServerRun run inbound servers
+func InBoundServerRun(ib core.Inbound, c conf.InBound) {
+	l := ib.Init(c)
 	for {
 		client, err := l.Accept()
         if err != nil {
             log.Panic(err)
 		}
-		if conf.CC.InBound.Type == "http" {
-			go core.HTTPServerHandle(client)
-		} else  {
-			go core.Sock5ServerHandle(client)
-		}
+		go ib.Handle(client)
     }
+	sw.Done()
 }

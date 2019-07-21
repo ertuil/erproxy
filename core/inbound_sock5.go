@@ -4,68 +4,36 @@ import (
 	"log"
 	"net"
 	"strconv"
-	"crypto/tls"
 	"erproxy/conf"
 )
 
-// InitServer is socks5 server
-func InitServer() net.Listener {
-
-	// Read from configuration
-	var istls bool
-	var certfile,keyfile,ip,port string
-
-	if !isTLS() {
-		istls = false
-	}  else {
-		istls = true
-		certfile = conf.CC.InBound.TLS.Cert
-		keyfile = conf.CC.InBound.TLS.Key
-	}
-
-	ip,port = getInAddr()
-
-	// TLS 
-	if istls {
-		cert, err := tls.LoadX509KeyPair(certfile, keyfile)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		config := &tls.Config{Certificates: []tls.Certificate{cert}}
-
-		l, err := tls.Listen("tcp", ip + ":" + port, config)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return l
-	}
-
-	// TCP with out TLS
-	l, err := net.Listen("tcp", ip + ":" + port)
-	log.Println("[erproxy] starting server in ",l.Addr())
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return l
+//Socks5Server .
+type Socks5Server struct {
+	c conf.InBound
 }
 
-// Sock5ServerHandle Handle
-func Sock5ServerHandle(client net.Conn) {
+// Init for socks5server
+func (ss *Socks5Server) Init(c conf.InBound) net.Listener {
+	ss.c = c
+	return InitServer(ss.c)
+}
+
+// Handle for socks5server
+func (ss *Socks5Server) Handle(client net.Conn) {
 	if client == nil {
 		return
 	}
 	defer client.Close()
 
 	// log.Printf("[erproxy] Connected from %v ...", client.RemoteAddr())
-	ret := Sock5HandShake(client)
+	ret := Sock5HandShake(client, ss.c )
 	if ret != true {
 		log.Printf("handshake failed")
 		return
 	}
 
-	if isAuth() {
-		ret = Sock5Auth(client)
+	if isAuth(ss.c) {
+		ret = Sock5Auth(client,ss.c)
 		if ret == false {
 			log.Printf("authenticate failed")
 			return 
@@ -84,7 +52,7 @@ func Sock5ServerHandle(client net.Conn) {
 }
 
 // Sock5HandShake result, ip, port
-func Sock5HandShake(client net.Conn) bool {
+func Sock5HandShake(client net.Conn,c conf.InBound) bool {
 	var b [1024]byte
 
 	// Read hand shake message
@@ -102,10 +70,10 @@ func Sock5HandShake(client net.Conn) bool {
 	nm := b[1]
 	ms := b[2:2+nm]
 
-	if isAuth() && selectMethod(ms, 0x02){
+	if isAuth(c) && selectMethod(ms, 0x02){
 		client.Write([]byte{0x05,0x02})
 		return true
-	} else if !isAuth() && selectMethod(ms, 0x00) {
+	} else if !isAuth(c) && selectMethod(ms, 0x00) {
 		client.Write([]byte{0x05,0x00})
 		return true
 	} else {
@@ -115,7 +83,7 @@ func Sock5HandShake(client net.Conn) bool {
 }
 
 // Sock5Auth auth function
-func Sock5Auth(client net.Conn) bool {
+func Sock5Auth(client net.Conn,c conf.InBound) bool {
 	var b [1024]byte
 
 	_, err := client.Read(b[:])
@@ -136,7 +104,7 @@ func Sock5Auth(client net.Conn) bool {
 	pn := b[2+un]
 	p:= b[2+un+1:2+un+1+pn]
 	
-	if authenticate(string(u), string(p)) {
+	if authenticate(string(u), string(p),c) {
 		client.Write([]byte{0x01,0x00})
 		return true
 	}
@@ -146,7 +114,7 @@ func Sock5Auth(client net.Conn) bool {
 }
 
 // Socks5Request is main request: ret, cmd, host, port
-func Socks5Request(client net.Conn) (bool, outbound)  {
+func Socks5Request(client net.Conn) (bool, Outbound)  {
 	var b [1024]byte
 	s := []byte{0x05,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00}
 	f := []byte{0x05,0x01,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00}
@@ -183,7 +151,7 @@ func Socks5Request(client net.Conn) (bool, outbound)  {
         return false, nil
 	}
 
-	var con outbound
+	var con Outbound
 	var ret bool
 
 	switch(cmd) {
@@ -199,7 +167,7 @@ func Socks5Request(client net.Conn) (bool, outbound)  {
 }
 
 // Socks5Connect connect
-func Socks5Connect(host, port string, atype byte) (bool, outbound) {
+func Socks5Connect(host, port string, atype byte) (bool, Outbound) {
 
 	out := getOutBound(host,port,atype)
 	if out == nil {

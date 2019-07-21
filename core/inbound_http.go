@@ -5,7 +5,19 @@ import (
 	"net/url"
 	"strings"
 	"net"
+	"erproxy/conf"
 )
+
+//HTTPServer .
+type HTTPServer struct {
+	c conf.InBound
+}
+
+// Init for HTTPServer
+func (hs *HTTPServer) Init(c conf.InBound) net.Listener {
+	hs.c = c
+	return InitServer(hs.c)
+}
 
 // FakeHandle .
 func FakeHandle(client net.Conn,info interface{}) {
@@ -35,8 +47,8 @@ func parseInfos(rawurl string) (string,string,byte) {
 	return host,port,atype
 }
 
-// HTTPServerHandle .
-func HTTPServerHandle(client net.Conn) {
+// Handle for HTTPServer
+func (hs *HTTPServer)Handle(client net.Conn) {
 
 	defer client.Close()
 
@@ -73,7 +85,7 @@ func HTTPServerHandle(client net.Conn) {
 	}
 
 	ret := true
-	if isAuth() {
+	if isAuth(hs.c) {
 		ret = false
 		for _,v := range(strs) {
 			if len(v) > 8 && strings.ToLower(v[0:8]) == "proxy-au" {
@@ -83,7 +95,7 @@ func HTTPServerHandle(client net.Conn) {
 					FakeHandle(client,"Error proxy auth")
 					return
 				}
-				ret = HTTPAuth(token[2])
+				ret = HTTPAuth(token[2],hs.c)
 				break
 			}
 		}

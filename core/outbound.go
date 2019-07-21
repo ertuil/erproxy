@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-type outbound interface {
+type Outbound interface {
 	getserver() net.Conn
 	start(string, string, byte) bool
 	loop(net.Conn)

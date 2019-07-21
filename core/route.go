@@ -18,7 +18,7 @@ const (
 	Proxy
 )
 
-func getOutBound(host,port string,atype byte) outbound {
+func getOutBound(host,port string,atype byte) Outbound {
 
 	ret := route(host,port,atype)
 	if ret == Direct {
