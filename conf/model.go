@@ -1,5 +1,11 @@
 package conf
 
+// Routes is route rules
+type Routes struct {
+	Default	string			`yaml:"default"`
+	Route map[string]string `yaml:"route"`
+}
+
 // TLS a tls
 type TLS struct {
 	Cert 		string		`yaml:"cert"`
@@ -32,4 +38,5 @@ type OutBound struct {
 type Config struct {
 	InBound 	InBound		`yaml:"in"`
 	OutBound 	OutBound	`yaml:"out"`
+	Routes		Routes		`yaml:"routes"`
 }

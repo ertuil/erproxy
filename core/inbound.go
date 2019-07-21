@@ -202,7 +202,7 @@ func Socks5Request(client net.Conn) (bool, outbound)  {
 // Socks5Connect connect
 func Socks5Connect(host, port string, atype byte) (bool, outbound) {
 
-	out := getOutBound()
+	out := getOutBound(host,port,atype)
 	if out == nil {
 		return false,nil
 	}

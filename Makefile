@@ -1,5 +1,5 @@
 build:
-	make clean & make darwin && make cp
+	make clean & make darwin && make cp && cd bin
 
 .PHONY: clean darwin linux windows build run cp
 cp:

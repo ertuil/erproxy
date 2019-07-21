@@ -34,3 +34,17 @@ func (fb *freebound) loop(client net.Conn){
 	go io.Copy(fb.server, client)
 	io.Copy(client, fb.server)
 }
+
+type blockbound struct {}
+
+func (bb *blockbound) getserver() net.Conn{
+	return nil
+}
+
+func (bb *blockbound) start(host,  port string, atype byte) bool {
+	return false
+}
+
+func (bb *blockbound) loop(client net.Conn) {
+	return 
+}
