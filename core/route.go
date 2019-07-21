@@ -19,9 +19,9 @@ const (
 	Proxy
 )
 
-func getOutBound(from, host,port string,atype byte) Outbound {
+func getOutBound(from, host, port string,atype byte) Outbound {
 	var ob Outbound
-	name,c := route(from,host,port,atype)
+	name,c := route(from,host, port,atype)
 	switch(c.Type) {
 	case "socks": ob = new(sockbound)
 	case "http": ob =  new(httpbound)
@@ -29,14 +29,14 @@ func getOutBound(from, host,port string,atype byte) Outbound {
 	case "block": ob = new(blockbound)
 	default :  ob = new(blockbound);name="block";c=conf.OutBound{Type: "block"}
 	}
-	log.Println("Route: from",from,"to",net.JoinHostPort(host,port),"via",name)
+	log.Println("Route: from",from,"to",net.JoinHostPort(host, port),"via",name)
 	ob.init(name,c)
 	return ob
 }
 
 func route(from, host, port string , atype byte) (string,conf.OutBound) {
 	for rule,policy := range(conf.CC.Routes.Route) {
-		if routeMatch(from, host,port,atype,rule) {
+		if routeMatch(from, host, port,atype,rule) {
 			return getPolicy(policy)
 		}
 	}

@@ -46,7 +46,7 @@ func parseInfos(rawurl string) (string,string,byte) {
 	} else {
 		atype = 0x03
 	}
-	return host,port,atype
+	return host, port,atype
 }
 
 // Handle for HTTPServer
@@ -75,7 +75,7 @@ func (hs *HTTPServer)Handle(client net.Conn) {
 	} 
 
 
-	host,port,atype := parseInfos(words[1])
+	host, port,atype := parseInfos(words[1])
 	if atype == 0x00 {
 		FakeHandle(client, "Cannot read url")
 		return
@@ -108,8 +108,8 @@ func (hs *HTTPServer)Handle(client net.Conn) {
 		client.Write([]byte("HTTP/1.1 407 Proxy authentication required\r\nProxy-Authenticate: Basic realm=erproxy\r\n"))
 	}
 
-	ob := getOutBound(hs.name,host,port,atype)
-	ret = ob.start(host,port,atype)
+	ob := getOutBound(hs.name,host, port,atype)
+	ret = ob.start(host, port,atype)
 	if ret == true {
 		defer ob.close()
 		log.Println("HTTP Server: Connection established")

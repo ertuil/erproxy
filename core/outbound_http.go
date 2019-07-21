@@ -49,7 +49,7 @@ func (hb *httpbound) start(host,  port string, atype byte) bool {
 
 	hb.server = server
 
-	str := "CONNECT " + net.JoinHostPort(host,port)  + "\r\nUser-agent: erproxy\\0.0.4\r\n"
+	str := "CONNECT " + net.JoinHostPort(host, port)  + "\r\nUser-agent: erproxy\\0.0.4\r\n"
 	if isOutAuth(hb.c) {
 		user,token := getOutAuth(hb.c)
 		str += "Proxy-authorization: Basic " + base64.URLEncoding.EncodeToString([]byte(user+":"+token))+"\r\n\r\n"
@@ -74,7 +74,7 @@ func (hb *httpbound) start(host,  port string, atype byte) bool {
 		return false
 	} 
 	if words[1] == "200"{
-		log.Println("HTTP client: Try to connect to ",net.JoinHostPort(host,port))
+		log.Println("HTTP client: Try to connect to ",net.JoinHostPort(host, port))
 		return true
 	} else if words[1] == "407" {
 		log.Println("HTTP client: Proxy Authentication Required")
