@@ -5,13 +5,14 @@ import (
 	"net"
 	"log"
 	"erproxy/conf"
+	"erproxy/header"
 )
 
 //Outbound is outboubd client 
 type Outbound interface {
 	getserver() net.Conn
 	init(string, conf.OutBound)
-	start(string, string, byte) bool
+	start(header.AddrInfo) bool
 	loop(net.Conn)
 	close()
 }
@@ -31,7 +32,8 @@ func (fb *freebound) init(name string, c conf.OutBound) {
 	fb.c =  c
 }
 
-func (fb *freebound) start(host,  port string, atype byte) bool {
+func (fb *freebound) start(ad header.AddrInfo) bool {
+	_,host,port,_,_  := ad.GetInfo()
 	server, err := net.Dial("tcp", net.JoinHostPort(host, port))
 	if err != nil {
 		log.Println("Free Client:",err)
@@ -67,8 +69,8 @@ func (bb *blockbound) init(name string, c conf.OutBound) {
 	bb.c =  c
 }
 
-func (bb *blockbound) start(host,  port string, atype byte) bool {
-
+func (bb *blockbound) start(ad header.AddrInfo) bool {
+	_,host,port,_,_ := ad.GetInfo()
 	log.Println("Block Client: Block connection to", host + ":" + port)
 	return false
 }

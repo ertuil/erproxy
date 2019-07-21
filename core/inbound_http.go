@@ -6,6 +6,7 @@ import (
 	"strings"
 	"net"
 	"erproxy/conf"
+	"erproxy/header"
 )
 
 //HTTPServer .
@@ -107,9 +108,10 @@ func (hs *HTTPServer)Handle(client net.Conn) {
 		log.Println("HTTP Server: need to auth")
 		client.Write([]byte("HTTP/1.1 407 Proxy authentication required\r\nProxy-Authenticate: Basic realm=erproxy\r\n"))
 	}
-
-	ob := getOutBound(hs.name,host, port,atype)
-	ret = ob.start(host, port,atype)
+	ad := header.AddrInfo{}
+	ad.SetInfo(hs.name,host,port,atype,0x01)
+	ob := getOutBound(ad)
+	ret = ob.start(ad)
 	if ret == true {
 		defer ob.close()
 		log.Println("HTTP Server: Connection established")

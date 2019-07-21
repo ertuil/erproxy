@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 	"erproxy/conf"
+	"erproxy/header"
 )
 
 // ResultStatus ,
@@ -19,9 +20,10 @@ const (
 	Proxy
 )
 
-func getOutBound(from, host, port string,atype byte) Outbound {
+func getOutBound(ad header.AddrInfo) Outbound {
+	from, host, port, _ ,_ := ad.GetInfo()
 	var ob Outbound
-	name,c := route(from,host, port,atype)
+	name,c := route(ad)
 	switch(c.Type) {
 	case "socks": ob = new(sockbound)
 	case "http": ob =  new(httpbound)
@@ -34,16 +36,18 @@ func getOutBound(from, host, port string,atype byte) Outbound {
 	return ob
 }
 
-func route(from, host, port string , atype byte) (string,conf.OutBound) {
+func route(ad header.AddrInfo) (string,conf.OutBound) {
+
 	for rule,policy := range(conf.CC.Routes.Route) {
-		if routeMatch(from, host, port,atype,rule) {
+		if routeMatch(ad,rule) {
 			return getPolicy(policy)
 		}
 	}
 	return getPolicy(conf.CC.Routes.Default)
 }
 
-func routeMatch(from, host, port string , atype byte, rule string) bool {
+func routeMatch(ad header.AddrInfo, rule string) bool {
+	from, host, port, atype, _ := ad.GetInfo()
 	testips := make([]net.IP,0)
 
 	if atype == 0x01 || atype == 0x04 {

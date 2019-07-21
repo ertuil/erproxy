@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 	"erproxy/conf"
+	"erproxy/header"
 	"crypto/tls"
 	"encoding/base64"
 )
@@ -25,8 +26,8 @@ func (hb *httpbound) init(name string, c conf.OutBound){
 	hb.c = c
 }
 
-func (hb *httpbound) start(host,  port string, atype byte) bool {
-
+func (hb *httpbound) start(ad header.AddrInfo) bool {
+	_,host,port,_,_ := ad.GetInfo()
 	var server net.Conn
 	var err error
 

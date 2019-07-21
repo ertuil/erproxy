@@ -5,6 +5,7 @@ import (
 	"net"
 	"strconv"
 	"erproxy/conf"
+	"erproxy/header"
 )
 
 //Socks5Server .
@@ -155,9 +156,10 @@ func Socks5Request(name string, client net.Conn) (bool, Outbound)  {
 
 	var con Outbound
 	var ret bool
-
+	ad := header.AddrInfo{}
+	ad.SetInfo(name,host,port,atyp,0x01)
 	switch(cmd) {
-	case 0x01: ret,con = Socks5Connect(name, host, port, atyp)
+	case 0x01: ret,con = Socks5Connect(ad)
 	}
 
 	if ret {
@@ -169,13 +171,13 @@ func Socks5Request(name string, client net.Conn) (bool, Outbound)  {
 }
 
 // Socks5Connect connect
-func Socks5Connect(name, host, port string, atype byte) (bool, Outbound) {
+func Socks5Connect(ad header.AddrInfo) (bool, Outbound) {
 
-	out := getOutBound(name,host, port,atype)
+	out := getOutBound(ad)
 	if out == nil {
 		return false,nil
 	}
-	ret := out.start(host, port, atype)
+	ret := out.start(ad)
 	if ret != true {
 		return false,nil
 	}

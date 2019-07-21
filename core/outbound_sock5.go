@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"erproxy/conf"
+	"erproxy/header"
 	"crypto/tls"
 )
 
@@ -24,7 +25,8 @@ func (sb *sockbound) init(name string, c conf.OutBound){
 	sb.c = c
 }
 
-func (sb *sockbound) start(host,  port string, atype byte) bool {
+func (sb *sockbound) start(ad header.AddrInfo) bool {
+	_,host, port, atype, _ := ad.GetInfo()
 	var server net.Conn
 	var err error
 
