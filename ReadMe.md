@@ -42,8 +42,8 @@ in:
     cert: "xxxxx.cer"
     key: "xxxxx.key"
   auth:
-    user: "xxxxxx"
-    token: "xxxxxx"
+    a: "b"
+    c: "d"
   
 out:
   type: "free"
