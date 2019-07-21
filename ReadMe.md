@@ -67,7 +67,5 @@ routes:
 
 ## Todo
 
-* route: freebound or next hop
 * socks5: udp associate \ bind command
-* accounting
 * http/https/vmess
