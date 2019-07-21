@@ -1,6 +1,6 @@
 # erproxy
 
-基于 golang 的多级 socks-tls 代理。
+基于 golang 的多级 socks-tls、http(s) 代理。
 
 ## Install
 

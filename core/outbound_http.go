@@ -47,7 +47,6 @@ func (hb *httpbound) start(host,  port string, atype byte) bool {
 		user,token := getOutAuth()
 		str += "Proxy-authorization: Basic " + base64.URLEncoding.EncodeToString([]byte(user+":"+token))+"\r\n\r\n"
 	}
-	log.Println("HTTP Client:",str)
 	server.Write([]byte(str))
 	
 	var b [1024]byte
