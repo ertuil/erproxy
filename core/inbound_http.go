@@ -90,13 +90,13 @@ func HTTPServerHandle(client net.Conn) {
 
 	if ret == false {
 		log.Println("HTTP Server: need to auth")
-		client.Write([]byte("HTTP/1.1 407 Unauthorized\r\nProxy-Authenticate: Basic realm=erproxy\r\n"))
+		client.Write([]byte("HTTP/1.1 407 Proxy authentication required\r\nProxy-Authenticate: Basic realm=erproxy\r\n"))
 	}
 
 	ob := getOutBound(host,port,atype)
 	ret = ob.start(host,port,atype)
 	if ret == true {
-		client.Write([]byte("HTTP/1.1 200 Connection established\r\n\r\n"))
+		client.Write([]byte("HTTP/1.1 200 Connection established\r\nProxy-agent: erproxy\r\n\r\n"))
 		ob.loop(client)
 	}
 	client.Write([]byte("HTTP/1.1 404 Not found\r\n\r\n"))

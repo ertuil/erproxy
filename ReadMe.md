@@ -30,6 +30,7 @@ example 1 :
 ``` yaml
 log: "log.txt"   # default: stdin
 in:
+  type: "http" #  or "socks"
   addr: "127.0.0.1" # default: 0.0.0.0
   port: "8080"  # default 1080
   
@@ -79,4 +80,7 @@ routes:
 ## Todo
 
 * socks5: udp associate \ bind command
-* http/https/vmess
+* vmess
+
+## Notice
+在 http/https 代理协议下访问 http 站点请使用强制 connect 方式连接。
