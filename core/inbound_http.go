@@ -10,12 +10,14 @@ import (
 
 //HTTPServer .
 type HTTPServer struct {
+	name string
 	c conf.InBound
 }
 
 // Init for HTTPServer
-func (hs *HTTPServer) Init(c conf.InBound) net.Listener {
+func (hs *HTTPServer) Init(name string,c  conf.InBound) net.Listener {
 	hs.c = c
+	hs.name = name
 	return InitServer(hs.c)
 }
 
@@ -106,7 +108,7 @@ func (hs *HTTPServer)Handle(client net.Conn) {
 		client.Write([]byte("HTTP/1.1 407 Proxy authentication required\r\nProxy-Authenticate: Basic realm=erproxy\r\n"))
 	}
 
-	ob := getOutBound(host,port,atype)
+	ob := getOutBound(hs.name,host,port,atype)
 	ret = ob.start(host,port,atype)
 	if ret == true {
 		defer ob.close()

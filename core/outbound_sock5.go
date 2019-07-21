@@ -10,6 +10,8 @@ import (
 )
 
 type sockbound struct {
+	name string
+	c conf.OutBound
 	server net.Conn
 }
 
@@ -17,14 +19,19 @@ func (sb *sockbound) getserver() net.Conn{
 	return sb.server
 }
 
+func (sb *sockbound) init(name string, c conf.OutBound){
+	sb.name = name
+	sb.c = c
+}
+
 func (sb *sockbound) start(host,  port string, atype byte) bool {
 	var server net.Conn
 	var err error
 
-	serverHost := conf.CC.OutBound.Addr
-	serverPort := conf.CC.OutBound.Port
+	serverHost := sb.c.Addr
+	serverPort := sb.c.Port
 
-	if conf.CC.OutBound.UseTLS == true {
+	if sb.c.UseTLS == true {
 		c := &tls.Config{
 			InsecureSkipVerify: true,
 		}
@@ -40,7 +47,7 @@ func (sb *sockbound) start(host,  port string, atype byte) bool {
 	}
 
 	sb.server = server
-	ret := Sock5Client(sb.server, host, port, atype)
+	ret := Sock5Client(sb.c, sb.server, host, port, atype)
 	if ret == false {
 		sb.server.Close()
 	}
@@ -59,15 +66,15 @@ func (sb *sockbound) close(){
 }
 
 // Sock5Client the client for sock5
-func Sock5Client(server net.Conn, host, port string, atype byte) bool {
-	ret := Socks5HandShake(server)
+func Sock5Client(c conf.OutBound, server net.Conn, host, port string, atype byte) bool {
+	ret := Socks5HandShake(c,server)
 	if ret == false {
 		log.Println("can not connect to the next hop")
 		return false
 	}
 
-	if isOutAuth() {
-		ret := Socks5ClientAuth(server)
+	if isOutAuth(c) {
+		ret := Socks5ClientAuth(c, server)
 		if ret == false {
 			log.Println("cancel connection")
 			return false
@@ -84,9 +91,9 @@ func Sock5Client(server net.Conn, host, port string, atype byte) bool {
 }
 
 // Socks5HandShake is handshake 
-func Socks5HandShake(server net.Conn) bool {
+func Socks5HandShake(c conf.OutBound, server net.Conn) bool {
 	var b [1024]byte
-	if isOutAuth()  {
+	if isOutAuth(c)  {
 		server.Write([]byte{0x05,0x01,0x02})
 
 		_, err := server.Read(b[:])
@@ -116,11 +123,11 @@ func Socks5HandShake(server net.Conn) bool {
 }
 
 // Socks5ClientAuth is auth client
-func Socks5ClientAuth(server net.Conn) bool {
+func Socks5ClientAuth(c conf.OutBound, server net.Conn) bool {
 	b := make([]byte,0)
 	var r [1024]byte 
 	b = append(b,0x01)
-	tu,tp := getOutAuth()
+	tu,tp := getOutAuth(c)
 	user := []byte(tu)
 	nu := byte(len(user))
 	pass := []byte(tp)

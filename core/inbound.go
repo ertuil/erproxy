@@ -9,7 +9,7 @@ import (
 
 // Inbound is inbound server
 type Inbound interface {
-	Init(conf.InBound) net.Listener
+	Init(string, conf.InBound) net.Listener
 	Handle(client net.Conn)
 }
 

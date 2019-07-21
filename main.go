@@ -64,7 +64,7 @@ func main(){
 
 	log.Printf("Erproxy start, config file: %v", conffile)
 
-	for _,c := range(conf.CC.InBound) {
+	for n,c := range(conf.CC.InBound) {
 		var ib core.Inbound
 		if c.Type == "socks"{
 			ib = new(core.Socks5Server)
@@ -72,14 +72,14 @@ func main(){
 			ib = new(core.HTTPServer)
 		}
 		sw.Add(1)
-		go InBoundServerRun(ib, c)
+		go InBoundServerRun(n, ib, c)
 	}
 	sw.Wait()
 }
 
 // InBoundServerRun run inbound servers
-func InBoundServerRun(ib core.Inbound, c conf.InBound) {
-	l := ib.Init(c)
+func InBoundServerRun(name string,ib core.Inbound, c conf.InBound) {
+	l := ib.Init(name, c)
 	for {
 		client, err := l.Accept()
         if err != nil {

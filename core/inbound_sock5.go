@@ -10,11 +10,13 @@ import (
 //Socks5Server .
 type Socks5Server struct {
 	c conf.InBound
+	name string
 }
 
 // Init for socks5server
-func (ss *Socks5Server) Init(c conf.InBound) net.Listener {
+func (ss *Socks5Server) Init(name string,c conf.InBound) net.Listener {
 	ss.c = c
+	ss.name = name
 	return InitServer(ss.c)
 }
 
@@ -40,7 +42,7 @@ func (ss *Socks5Server) Handle(client net.Conn) {
 		}
 	}
 
-	ret,out := Socks5Request(client)
+	ret,out := Socks5Request(ss.name,client)
 
 	if ret == false {
 		log.Println("cannot connect to outbound")
@@ -114,7 +116,7 @@ func Sock5Auth(client net.Conn,c conf.InBound) bool {
 }
 
 // Socks5Request is main request: ret, cmd, host, port
-func Socks5Request(client net.Conn) (bool, Outbound)  {
+func Socks5Request(name string, client net.Conn) (bool, Outbound)  {
 	var b [1024]byte
 	s := []byte{0x05,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00}
 	f := []byte{0x05,0x01,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00}
@@ -155,7 +157,7 @@ func Socks5Request(client net.Conn) (bool, Outbound)  {
 	var ret bool
 
 	switch(cmd) {
-	case 0x01: ret,con = Socks5Connect(host, port, atyp)
+	case 0x01: ret,con = Socks5Connect(name, host, port, atyp)
 	}
 
 	if ret {
@@ -167,9 +169,9 @@ func Socks5Request(client net.Conn) (bool, Outbound)  {
 }
 
 // Socks5Connect connect
-func Socks5Connect(host, port string, atype byte) (bool, Outbound) {
+func Socks5Connect(name, host, port string, atype byte) (bool, Outbound) {
 
-	out := getOutBound(host,port,atype)
+	out := getOutBound(name,host,port,atype)
 	if out == nil {
 		return false,nil
 	}

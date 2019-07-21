@@ -31,15 +31,15 @@ func getInAddr(c conf.InBound) (string,string) {
 	return ad,pt
 }
 
-func isOutAuth() bool {
-	if len(conf.CC.OutBound.Auth)> 0 {
+func isOutAuth(c conf.OutBound) bool {
+	if len(c.Auth)> 0 {
 		return true
 	}
 	return false
 }
 
-func getOutAuth() (string,string) {
-	for k,v := range(conf.CC.OutBound.Auth) {
+func getOutAuth(c conf.OutBound) (string,string) {
+	for k,v := range(c.Auth) {
 		return k,v
 	}
 	return "",""

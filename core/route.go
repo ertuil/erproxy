@@ -2,6 +2,7 @@ package core
 
 import (
 	"net"
+	"log"
 	"strings"
 	"erproxy/conf"
 )
@@ -18,37 +19,31 @@ const (
 	Proxy
 )
 
-func getOutBound(host,port string,atype byte) Outbound {
-
-	ret := route(host,port,atype)
-	if ret == Direct {
-		return new(freebound)
-	} else if ret == Block {
-		return new(blockbound)
-	} else {
-		if conf.CC.OutBound.Type == "free" {
-			return new(freebound)
-		} else if conf.CC.OutBound.Type == "socks" {
-			return new(sockbound)
-		} else if conf.CC.OutBound.Type == "http" {
-			return new(httpbound)
-		} else if conf.CC.OutBound.Type == "block" {
-			return new(blockbound)
-		}
+func getOutBound(from, host,port string,atype byte) Outbound {
+	var ob Outbound
+	name,c := route(from,host,port,atype)
+	switch(c.Type) {
+	case "socks": ob = new(sockbound)
+	case "http": ob =  new(httpbound)
+	case "free": ob = new(freebound)
+	case "block": ob = new(blockbound)
+	default :  ob = new(blockbound);name="block";c=conf.OutBound{Type: "block"}
 	}
-	return new(freebound)
+	log.Println("Route: from",from,"to",net.JoinHostPort(host,port),"via",name)
+	ob.init(name,c)
+	return ob
 }
 
-func route(host, port string , atype byte) ResultStatus {
+func route(from, host, port string , atype byte) (string,conf.OutBound) {
 	for rule,policy := range(conf.CC.Routes.Route) {
-		if routeMatch(host,port,atype,rule) {
+		if routeMatch(from, host,port,atype,rule) {
 			return getPolicy(policy)
 		}
 	}
 	return getPolicy(conf.CC.Routes.Default)
 }
 
-func routeMatch(host, port string , atype byte, rule string) bool {
+func routeMatch(from, host, port string , atype byte, rule string) bool {
 	testips := make([]net.IP,0)
 
 	if atype == 0x01 || atype == 0x04 {
@@ -68,7 +63,17 @@ func routeMatch(host, port string , atype byte, rule string) bool {
 		}
 	}
 
-	// IP compare
+
+	// Interface route
+	ruleFrom := strings.Split(rule,"@")
+	if len(ruleFrom) >= 2 {
+		rule = ruleFrom[0]
+	}
+	if len(ruleFrom) >= 2 && ruleFrom[1] != from {
+		return false
+	}
+
+	// IP route
 	ruleIP := net.ParseIP(rule)
 	if ruleIP != nil {
 		for _,v := range(testips) {
@@ -79,7 +84,7 @@ func routeMatch(host, port string , atype byte, rule string) bool {
 		return false
 	}
 
-	// CIDR compare
+	// CIDR route
 	ruleIP,ruleCIDR,err := net.ParseCIDR(rule)
 	if err == nil {
 		for _,v := range(testips) {
@@ -90,24 +95,23 @@ func routeMatch(host, port string , atype byte, rule string) bool {
 		}
 	}
 
-	// port compare
+	// port route
 	if strings.Contains(rule,"port:") {
 		if rule[5:] == port {
 			return true
 		}
 	}
 
-	// Daemon compare
+	// Daemon route
 	return strings.Contains(host,rule)
 }
 
-func getPolicy(v string) ResultStatus {
-	if v == "direct" {
-		return Direct
-	} else if v == "proxy" {
-		return Proxy
-	} else if v == "block" {
-		return Block
+func getPolicy(v string) (string,conf.OutBound) {
+
+	for n,c := range(conf.CC.OutBound) {
+		if n == v {
+			return n,c
+		}
 	}
-	return Proxy
+	return "block",conf.OutBound{Type: "block"}
 }

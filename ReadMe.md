@@ -25,56 +25,65 @@ Usage of ./erproxy-darwin:
 
 ## Config
 
-example 1 :
-
-``` yaml
-log: "log.txt"   # default: stdin
-in:
-  type: "http" #  or "socks"
-  addr: "127.0.0.1" # default: 0.0.0.0
-  port: "8080"  # default 1080
-  
-out:
-  type: "socks"
-  tls: true
-  port: "8081"
-  addr: "127.0.0.1"
-  auth:
-    username: "password"
-```
-
-example2:
+Example
 
 ``` yaml
 log: "stdin"
-in:
-  addr: "127.0.0.1"
-  port: "8081"
-  tls:
-    cert: "xxxxx.cer"
-    key: "xxxxx.key"
-  auth:
-    a: "b"
-    c: "d"
+
+in:  # Inbounds
+  a:
+    type: "http" # http or socks
+    addr: "127.0.0.1"
+    port: "8080"
+  b:
+    type: "socks"
+    addr: "127.0.0.1"
+    port: "8081"
+    tls:
+      cert: "fullchain.cer"
+      key: "xxxx.key"
+    auth:
+      aaa: "bbb"
+      c: "d"
   
 out:
-  type: "free"
+  c:
+    type: "http"
+    tls: true
+    port: "29980"
+    addr: "light.ustclug.org"
+    auth:
+      "xxxx": "xxxx"
+  d:
+    type: "socks"
+    tls: true
+    port: "465"
+    addr: "japan.ertuil.top"
+    auth:
+      "xxxx": "xxxx"
+  free:
+    type: "free"
+  block:
+    type: "block"
 
 routes:
-  default: "free"
-  a.com: "block"
+  default: "c"
+  route:
+    baidu.com: "free"
+    google: "d"
+    twitter: "block"
 ```
 
-## route
+## Route 
 
-``` yml
+```
 routes:
-  default: "proxy" # or "direct" or "block"
+  default: "d" #
   route:
-    www.baidu.com: "block"
-    111.222.333.444: "proxy"
-    222.333.444.555/24: "free"
-    port:80: "block"
+    www.baidu.com: "free" # daemon
+    111.222.333.444: "free" # IPv4 or IPv6
+    222.333.444.555/24: "block" # CIDR
+    port:80: "c" # PORT
 ```
 
 ## Todo
