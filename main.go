@@ -71,7 +71,8 @@ func main(){
 		}
 		if conf.CC.InBound.Type == "http" {
 			go core.HTTPServerHandle(client)
+		} else  {
+			go core.Sock5ServerHandle(client)
 		}
-        go core.Sock5ServerHandle(client)
     }
 }

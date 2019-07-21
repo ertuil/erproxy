@@ -68,7 +68,7 @@ func authenticate(username string, password string) bool {
 // HTTPAuth .
 func HTTPAuth(token string) bool {
 	for k,v := range(conf.CC.InBound.Auth) {
-		if token == base64.StdEncoding.EncodeToString([]byte(k+":"+v)) {
+		if token == base64.URLEncoding.EncodeToString([]byte(k+":"+v)) {
 			return true
 		}
 	}
