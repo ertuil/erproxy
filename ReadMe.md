@@ -84,6 +84,8 @@ routes:
     111.222.333.444: "free" # IPv4 or IPv6
     222.333.444.555/24: "block" # CIDR
     port:80: "c" # PORT
+    github@a: "block" # from a to github via block, aka drop
+    github@b: "c" # from b to github via c
 ```
 
 ## Todo
