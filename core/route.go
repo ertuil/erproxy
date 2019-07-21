@@ -107,5 +107,5 @@ func getPolicy(v string) ResultStatus {
 	} else if v == "block" {
 		return Block
 	}
-	return Direct
+	return Proxy
 }

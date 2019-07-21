@@ -110,9 +110,10 @@ func Socks5ClientAuth(server net.Conn) bool {
 	b := make([]byte,0)
 	var r [1024]byte 
 	b = append(b,0x01)
-	user := []byte(conf.CC.OutBound.Auth.User)
+	tu,tp := getOutAuth()
+	user := []byte(tu)
 	nu := byte(len(user))
-	pass := []byte(conf.CC.OutBound.Auth.Token)
+	pass := []byte(tp)
 	np := byte(len(pass))
 	b = append(b,nu)
 	b = append(b,user...)

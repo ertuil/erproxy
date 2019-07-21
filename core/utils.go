@@ -19,10 +19,17 @@ func isAuth() bool {
 }
 
 func isOutAuth() bool {
-	if conf.CC.OutBound.Auth.User != "" && conf.CC.OutBound.Auth.Token != "" {
+	if len(conf.CC.OutBound.Auth)> 0 {
 		return true
 	}
 	return false
+}
+
+func getOutAuth() (string,string) {
+	for k,v := range(conf.CC.OutBound.Auth) {
+		return k,v
+	}
+	return "",""
 }
 
 func selectMethod(a []byte,b byte) bool {

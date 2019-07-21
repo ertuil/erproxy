@@ -31,7 +31,7 @@ type OutBound struct {
 	Type		string		`yaml:"type"`
 	Addr		string		`yaml:"addr"`
 	Port		string		`yaml:"port"`
-	Auth		Auth		`yaml:"auth"`
+	Auth		map[string]string		`yaml:"auth"`
 	UseTLS		bool		`yaml:"tls"`
 }
 // Config is a config

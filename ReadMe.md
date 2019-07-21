@@ -28,8 +28,7 @@ out:
   port: "8081"
   addr: "127.0.0.1"
   auth:
-    user: "xxxx"
-    token: "xxxxxx"
+    username: "password"
 ```
 
 example2:
