@@ -8,8 +8,8 @@ import (
 	"erproxy/conf"
 )
 
-// Socks5Server is socks5 server
-func Socks5Server() net.Listener {
+// InitServer is socks5 server
+func InitServer() net.Listener {
 
 	// Read from configuration
 	var istls bool
@@ -43,7 +43,7 @@ func Socks5Server() net.Listener {
 
 	// TCP with out TLS
 	l, err := net.Listen("tcp", ip + ":" + port)
-	log.Println("[erproxy] starting socks server in ",l.Addr())
+	log.Println("[erproxy] starting server in ",l.Addr())
 	if err != nil {
 		log.Fatalln(err)
 	}

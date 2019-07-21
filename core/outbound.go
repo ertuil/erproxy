@@ -27,6 +27,7 @@ func (fb *freebound) start(host,  port string, atype byte) bool {
 		return false
 	}
 	fb.server = server
+	log.Println("Free Server: Try to connect to", host + ":" + port)
 	return true
 }
 
@@ -42,6 +43,7 @@ func (bb *blockbound) getserver() net.Conn{
 }
 
 func (bb *blockbound) start(host,  port string, atype byte) bool {
+	log.Println("Block Server: Block connection to", host + ":" + port)
 	return false
 }
 

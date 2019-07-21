@@ -45,7 +45,7 @@ func main(){
 	if logfile == ""  {
 		logfile = "stdin"
 	}
-	
+
 	if back == true {
 		st := " -c " +  conffile
 		cmd := exec.Command(os.Args[0], st)
@@ -62,13 +62,16 @@ func main(){
 
 	log.Printf("Erproxy start, config file: %v", conffile)
 
-	l := core.Socks5Server()
+	l := core.InitServer()
 	
 	for {
 		client, err := l.Accept()
         if err != nil {
             log.Panic(err)
-        }
+		}
+		if conf.CC.InBound.Type == "http" {
+			go core.HTTPServerHandle(client)
+		}
         go core.Sock5ServerHandle(client)
     }
 }

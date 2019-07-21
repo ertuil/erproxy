@@ -2,6 +2,7 @@ package core
 
 import (
 	"erproxy/conf"
+	"encoding/base64"
 )
 
 func isTLS() bool {
@@ -58,6 +59,16 @@ func selectMethod(a []byte,b byte) bool {
 func authenticate(username string, password string) bool {
 	for k,v := range(conf.CC.InBound.Auth) {
 		if username == k && password ==  v {
+			return true
+		}
+	}
+	return false
+}
+
+// HTTPAuth .
+func HTTPAuth(token string) bool {
+	for k,v := range(conf.CC.InBound.Auth) {
+		if token == base64.StdEncoding.EncodeToString([]byte(k+":"+v)) {
 			return true
 		}
 	}

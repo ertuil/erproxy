@@ -20,6 +20,7 @@ type Auth struct {
 
 // InBound a bound
 type InBound struct {
+	Type		string 		`yaml:"type"`
 	Addr		string		`yaml:"addr"`
 	Port		string		`yaml:"port"`
 	TLS			TLS			`yaml:"tls"`
