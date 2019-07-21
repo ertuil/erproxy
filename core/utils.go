@@ -12,7 +12,7 @@ func isTLS() bool {
 }
 
 func isAuth() bool {
-	if conf.CC.InBound.Auth.User != "" && conf.CC.InBound.Auth.Token != "" {
+	if len(conf.CC.InBound.Auth) > 0 {
 		return true
 	}
 	return false
@@ -37,8 +37,10 @@ func selectMethod(a []byte,b byte) bool {
 
 
 func authenticate(username string, password string) bool {
-	if username == conf.CC.InBound.Auth.User && password == conf.CC.InBound.Auth.Token {
-		return true
+	for k,v := range(conf.CC.InBound.Auth) {
+		if username == k && password ==  v {
+			return true
+		}
 	}
 	return false
 }

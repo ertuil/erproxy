@@ -17,7 +17,7 @@ type InBound struct {
 	Addr		string		`yaml:"addr"`
 	Port		string		`yaml:"port"`
 	TLS			TLS			`yaml:"tls"`
-	Auth		Auth		`yaml:"auth"`
+	Auth		map[string]string		`yaml:"auth"`
 }
 
 // OutBound is Bound
