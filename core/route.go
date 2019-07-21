@@ -28,7 +28,7 @@ func getOutBound(host,port string,atype byte) outbound {
 	} else {
 		if conf.CC.OutBound.Type == "free" {
 			return new(freebound)
-		} else if conf.CC.OutBound.Type == "sock" {
+		} else if conf.CC.OutBound.Type == "socks" {
 			return new(sockbound)
 		} else if conf.CC.OutBound.Type == "block" {
 			return new(blockbound)

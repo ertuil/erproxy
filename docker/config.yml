@@ -1,0 +1,13 @@
+log: "stdin"
+
+in:
+  addr: "127.0.0.1"
+  port: "1080"
+  
+out:
+  type: "free"
+
+routes:
+  default: "proxy"
+  route:
+    baidu.com: "direct"

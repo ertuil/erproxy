@@ -147,7 +147,7 @@ func Socks5ClientAuth(server net.Conn) bool {
 // Socks5ClientConnect lalala
 func Socks5ClientConnect(server net.Conn, host, port string, atype byte) bool {
 	b := make([]byte,0)
-	log.Println("Trying to connect to", host, " : " ,port)
+	log.Println("Trying to connect to", host + ":" + port)
 	var ip []byte
 	var err error
 	if atype == 0x01 || atype == 0x04{

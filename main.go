@@ -17,7 +17,7 @@ var (
 )
 
 func setFlag() {
-	flag.StringVar(&logfile, "l", "erproxy.log", "set logging file")
+	// flag.StringVar(&logfile, "l", "erproxy.log", "set logging file")
 	flag.StringVar(&conffile, "c", "config.yml", "set configuration file")
 	flag.BoolVar(&back, "d",false,"if erproxy needs to run in the background")
 	if ! flag.Parsed() {
@@ -25,6 +25,7 @@ func setFlag() {
 	}
 }
 func setLog(logfile string) {
+
 	if logfile != "stdin" {
 		f, err := os.OpenFile(logfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
@@ -38,9 +39,15 @@ func setLog(logfile string) {
 
 func main(){
 	setFlag()
+	conf.GetConfig(conffile);
 
+	logfile = conf.CC.Log
+	if logfile == ""  {
+		logfile = "stdin"
+	}
+	
 	if back == true {
-		st := " -c " +  conffile + " -l " + logfile
+		st := " -c " +  conffile
 		cmd := exec.Command(os.Args[0], st)
 		err := cmd.Start()
 		fmt.Println(os.Args[0] + st)
@@ -53,9 +60,7 @@ func main(){
 
 	setLog(logfile)
 
-	log.Printf("Erproxy start, config file: %v, log file: %v\n",conffile, logfile)
-	conf.GetConfig(conffile);
-	log.Println(conf.CC)
+	log.Printf("Erproxy start, config file: %v", conffile)
 
 	l := core.Socks5Server()
 	

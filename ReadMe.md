@@ -2,6 +2,18 @@
 
 基于 golang 的多级 socks-tls 代理。
 
+## Install
+
+```
+make build
+```
+
+or 
+
+```
+docker pull ertuil/erproxy:latest
+docker run -it --rm --name erproxy -p  1080:1080 -v <data>:/app ertuil/erproxy
+```
 ## Usage
 
 ```
@@ -9,8 +21,6 @@ Usage of ./erproxy-darwin:
   -c string
         set configuration file (default "config.yml")
   -d=true   if erproxy needs to run in the background
-  -l string
-        set logging file (default "erproxy.log")
 ```
 
 ## Config
@@ -18,12 +28,13 @@ Usage of ./erproxy-darwin:
 example 1 :
 
 ``` yaml
+log: "log.txt"   # default: stdin
 in:
-  addr: "127.0.0.1"
-  port: "8080"
+  addr: "127.0.0.1" # default: 0.0.0.0
+  port: "8080"  # default 1080
   
 out:
-  type: "sock"
+  type: "socks"
   tls: true
   port: "8081"
   addr: "127.0.0.1"
@@ -34,6 +45,7 @@ out:
 example2:
 
 ``` yaml
+log: "stdin"
 in:
   addr: "127.0.0.1"
   port: "8081"

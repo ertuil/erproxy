@@ -36,6 +36,7 @@ type OutBound struct {
 }
 // Config is a config
 type Config struct {
+	Log			string		`yaml:"log"`
 	InBound 	InBound		`yaml:"in"`
 	OutBound 	OutBound	`yaml:"out"`
 	Routes		Routes		`yaml:"routes"`

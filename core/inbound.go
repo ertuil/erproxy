@@ -23,8 +23,7 @@ func Socks5Server() net.Listener {
 		keyfile = conf.CC.InBound.TLS.Key
 	}
 
-	ip = conf.CC.InBound.Addr
-	port = conf.CC.InBound.Port
+	ip,port = getInAddr()
 
 	// TLS 
 	if istls {

@@ -18,6 +18,18 @@ func isAuth() bool {
 	return false
 }
 
+func getInAddr() (string,string) {
+	ad := conf.CC.InBound.Addr
+	pt := conf.CC.InBound.Port
+	if ad == "" {
+		ad = "0.0.0.0"
+	}
+	if pt == "" {
+		pt = "1080"
+	}
+	return ad,pt
+}
+
 func isOutAuth() bool {
 	if len(conf.CC.OutBound.Auth)> 0 {
 		return true

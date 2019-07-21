@@ -1,2 +1,5 @@
 bin/*
+.vscode
+.DS_Store
+docker/erproxy*
 test/*
