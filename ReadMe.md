@@ -47,6 +47,22 @@ in:
   
 out:
   type: "free"
+
+routes:
+  default: "free"
+  a.com: "block"
+```
+
+## route
+
+``` yml
+routes:
+  default: "proxy" # or "direct" or "block"
+  route:
+    www.baidu.com: "block"
+    111.222.333.444: "proxy"
+    222.333.444.555/24: "free"
+    port:80: "block"
 ```
 
 ## Todo
