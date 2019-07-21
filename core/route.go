@@ -30,11 +30,13 @@ func getOutBound(host,port string,atype byte) outbound {
 			return new(freebound)
 		} else if conf.CC.OutBound.Type == "socks" {
 			return new(sockbound)
+		} else if conf.CC.OutBound.Type == "http" {
+			return new(httpbound)
 		} else if conf.CC.OutBound.Type == "block" {
 			return new(blockbound)
 		}
 	}
-	return nil
+	return new(freebound)
 }
 
 func route(host, port string , atype byte) ResultStatus {

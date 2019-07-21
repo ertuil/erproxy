@@ -79,7 +79,7 @@ func Sock5ServerHandle(client net.Conn) {
 		return
 	}
 
-	defer out.getserver().Close()
+	defer out.close()
 	out.loop(client)
 }
 
@@ -90,12 +90,12 @@ func Sock5HandShake(client net.Conn) bool {
 	// Read hand shake message
 	_, err := client.Read(b[:])
     if err != nil {
-        log.Println(err)
+        log.Println("Socks Server:",err)
         return false
 	}
 	
 	if b[0] !=  0x05 {
-		log.Println("Protocal error or version error")
+		log.Println("Socks Server: Protocal error or version error")
 		return false
 	}
 
@@ -120,14 +120,14 @@ func Sock5Auth(client net.Conn) bool {
 
 	_, err := client.Read(b[:])
 	if err != nil {
-		log.Println(err)
+		log.Println("Socks Server:", err)
 		client.Write([]byte{0x01,0x01})
         return false
 	}
 
 	v1 := b[0]
 	if v1 != 0x01 {
-		log.Println("Autnenticate version error")
+		log.Println("Socks Server:","Autnenticate version error")
 		client.Write([]byte{0x01,0x01})
 		return false
 	}
@@ -153,14 +153,14 @@ func Socks5Request(client net.Conn) (bool, outbound)  {
 
 	n, err := client.Read(b[:])
 	if err != nil {
-		log.Println(err)
+		log.Println("Socks Server:",err)
 		client.Write(f)
         return false, nil
 	}
 
 	v := b[0]
 	if v != 0x05 {
-		log.Println("Socks version error")
+		log.Println("Socks Server:","Socks version error")
 		client.Write(f)
         return false, nil
 	}
@@ -178,7 +178,7 @@ func Socks5Request(client net.Conn) (bool, outbound)  {
 	case 0x04: host = net.IP{b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], 
 			b[14], b[15], b[16], b[17], b[18], b[19]}.String()
 	default:
-		log.Println("Socks version error")
+		log.Println("Socks Server:","Socks version error")
 		client.Write(f)
         return false, nil
 	}

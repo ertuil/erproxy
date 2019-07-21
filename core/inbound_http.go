@@ -9,7 +9,7 @@ import (
 
 // FakeHandle .
 func FakeHandle(client net.Conn,info interface{}) {
-	log.Println("HTTP server:", info)
+	log.Println("HTTP Server:", info)
 	client.Write([]byte("HTTP/1.1 200 OK \r\n\r\nhello,world!"))
 }
 
@@ -32,12 +32,14 @@ func parseInfos(rawurl string) (string,string,byte) {
 	} else {
 		atype = 0x03
 	}
-	log.Println(host,port)
 	return host,port,atype
 }
 
 // HTTPServerHandle .
 func HTTPServerHandle(client net.Conn) {
+
+	defer client.Close()
+
 	var b [1024]byte
 
 	_,err := client.Read(b[:])
@@ -58,7 +60,6 @@ func HTTPServerHandle(client net.Conn) {
 		return 
 	} 
 
-	log.Println(strs[0])
 
 	host,port,atype := parseInfos(words[1])
 	if atype == 0x00 {
@@ -96,8 +97,12 @@ func HTTPServerHandle(client net.Conn) {
 	ob := getOutBound(host,port,atype)
 	ret = ob.start(host,port,atype)
 	if ret == true {
+		defer ob.close()
+		log.Println("HTTP Server: Connection established")
 		client.Write([]byte("HTTP/1.1 200 Connection established\r\nProxy-agent: erproxy\r\n\r\n"))
 		ob.loop(client)
+	} else {
+		log.Println("HTTP Server: Connection failed")
+		client.Write([]byte("HTTP/1.1 404 Not found\r\n\r\n"))
 	}
-	client.Write([]byte("HTTP/1.1 404 Not found\r\n\r\n"))
 }

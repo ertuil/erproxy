@@ -34,18 +34,28 @@ func (sb *sockbound) start(host,  port string, atype byte) bool {
 	}
 
 	if err != nil {
+		server.Close()
 		log.Println(err)
 		return false
 	}
 
 	sb.server = server
 	ret := Sock5Client(sb.server, host, port, atype)
+	if ret == false {
+		sb.server.Close()
+	}
 	return ret
 }
 
 func (sb *sockbound) loop(client net.Conn){
 	go io.Copy(sb.server, client)
 	io.Copy(client, sb.server)
+}
+
+func (sb *sockbound) close(){
+	if sb.server !=  nil {
+		sb.server.Close()
+	}
 }
 
 // Sock5Client the client for sock5
@@ -147,14 +157,14 @@ func Socks5ClientAuth(server net.Conn) bool {
 // Socks5ClientConnect lalala
 func Socks5ClientConnect(server net.Conn, host, port string, atype byte) bool {
 	b := make([]byte,0)
-	log.Println("Socks Server: Try to connect to", host + ":" + port)
+	log.Println("Socks Client: Try to connect to", host + ":" + port)
 	var ip []byte
 	var err error
 	if atype == 0x01 || atype == 0x04{
 		t := net.ParseIP(host)
 		ip, err = t.MarshalText()
 		if err != nil {
-			log.Println("cannot marshal ip")
+			log.Println("Socks Client: Cannot marshal ip")
 			return false
 		}
 	} else {
@@ -165,7 +175,7 @@ func Socks5ClientConnect(server net.Conn, host, port string, atype byte) bool {
 
 	p,err := strconv.Atoi(port)
 	if err != nil {
-		log.Println("cannot marshal port")
+		log.Println("Socks Client: Can not marshal port")
 		return false
 	}
 	var pp  [2]byte
@@ -181,7 +191,7 @@ func Socks5ClientConnect(server net.Conn, host, port string, atype byte) bool {
 	_,err = server.Read(rsp[:])
 
 	if err != nil {
-		log.Println("Error Cannot connect from server")
+		log.Println("Socks Client: Error Cannot connect from server")
 		return false
 	}
 
@@ -189,6 +199,6 @@ func Socks5ClientConnect(server net.Conn, host, port string, atype byte) bool {
 		return true
 	}
 
-	log.Println("Cannot connect from server")
+	log.Println("Socks Client: Cannot connect from server")
 	return false
 }
