@@ -33,8 +33,15 @@ func (fb *freebound) init(name string, c conf.OutBound) {
 }
 
 func (fb *freebound) start(ad header.AddrInfo) bool {
-	_,host,port,_,_  := ad.GetInfo()
-	server, err := net.Dial("tcp", net.JoinHostPort(host, port))
+	_,host,port,_,cmd  := ad.GetInfo()
+	var server net.Conn
+	var err error
+	if cmd == 0x01 {
+		server, err = net.Dial("tcp", net.JoinHostPort(host, port))
+	} else if cmd == 0x02 {
+		server, err = net.Dial("udp", net.JoinHostPort(host, port))
+	}
+	
 	if err != nil {
 		log.Println("Free Client:",err)
 		return false
