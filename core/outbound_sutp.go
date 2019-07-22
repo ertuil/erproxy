@@ -64,6 +64,7 @@ func (sb *sutpbound) start(ad header.AddrInfo) bool {
 		ip, err = t.MarshalText()
 		if err != nil {
 			log.Println("SUTP Client: Cannot marshal ip")
+			server.Close()
 			return false
 		}
 	} else {
@@ -75,6 +76,7 @@ func (sb *sutpbound) start(ad header.AddrInfo) bool {
 	p, err := strconv.Atoi(port)
 	if err != nil {
 		log.Println("SUTP Client: Can not marshal port")
+		server.Close()
 		return false
 	}
 	var pp [2]byte
@@ -107,5 +109,6 @@ func (sb *sutpbound) start(ad header.AddrInfo) bool {
 		return true
 	}
 	log.Println("SUTP Client: Cannot connect to server")
+	server.Close()
 	return false
 }
