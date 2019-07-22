@@ -1,28 +1,28 @@
 package main
 
 import (
-	"os"
-	"os/exec"
-	"fmt"
-	"log"
-	"flag"
-	"sync"
 	"erproxy/conf"
 	"erproxy/core"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"sync"
 )
 
 var (
-	logfile string
+	logfile  string
 	conffile string
-	back bool
-	sw sync.WaitGroup
+	back     bool
+	sw       sync.WaitGroup
 )
 
 func setFlag() {
 	// flag.StringVar(&logfile, "l", "erproxy.log", "set logging file")
 	flag.StringVar(&conffile, "c", "config.yml", "set configuration file")
-	flag.BoolVar(&back, "d",false,"if erproxy needs to run in the background")
-	if ! flag.Parsed() {
+	flag.BoolVar(&back, "d", false, "if erproxy needs to run in the background")
+	if !flag.Parsed() {
 		flag.Parse()
 	}
 }
@@ -39,17 +39,17 @@ func setLog(logfile string) {
 	log.SetFlags(log.LstdFlags)
 }
 
-func main(){
+func main() {
 	setFlag()
-	conf.GetConfig(conffile);
+	conf.GetConfig(conffile)
 
 	logfile = conf.CC.Log
-	if logfile == ""  {
+	if logfile == "" {
 		logfile = "stdin"
 	}
 
 	if back == true {
-		st := " -c " +  conffile
+		st := " -c " + conffile
 		cmd := exec.Command(os.Args[0], st)
 		err := cmd.Start()
 		fmt.Println(os.Args[0] + st)
@@ -64,12 +64,14 @@ func main(){
 
 	log.Printf("Erproxy start, config file: %v", conffile)
 
-	for n,c := range(conf.CC.InBound) {
+	for n, c := range conf.CC.InBound {
 		var ib core.Inbound
-		if c.Type == "socks"{
+		if c.Type == "socks" {
 			ib = new(core.Socks5Server)
-		} else {
+		} else if c.Type == "http" {
 			ib = new(core.HTTPServer)
+		} else {
+			ib = new(core.SUTPServer)
 		}
 		sw.Add(1)
 		go InBoundServerRun(n, ib, c)
@@ -78,14 +80,14 @@ func main(){
 }
 
 // InBoundServerRun run inbound servers
-func InBoundServerRun(name string,ib core.Inbound, c conf.InBound) {
+func InBoundServerRun(name string, ib core.Inbound, c conf.InBound) {
 	l := ib.Init(name, c)
 	for {
 		client, err := l.Accept()
-        if err != nil {
-            log.Panic(err)
+		if err != nil {
+			log.Panic(err)
 		}
 		go ib.Handle(client)
-    }
+	}
 	sw.Done()
 }
