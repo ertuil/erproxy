@@ -1,6 +1,6 @@
 # erproxy
 
-基于 golang 的多级 socks-tls、http(s) 代理。
+基于 golang 的多级 socks-tls、http(s)、sutp（自有协议） 代理。
 
 ## Install
 
@@ -91,7 +91,10 @@ routes:
 ## Todo
 
 * socks5: udp associate \ bind command
-* vmess
 
 ## Notice
 在 http/https 代理协议下访问 http 站点请使用强制 connect 方式连接。
+
+## SUTP
+
+一种自由代理协议，实现 1RTT 完成信道建立可能比 socks 具有更好性能和较高混淆特性。

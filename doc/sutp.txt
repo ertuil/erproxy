@@ -1,0 +1,50 @@
+Simple Unniverse Transport Protocal
+
+V 0.0.1
+
+1. request
+
++------+-------+------------------+
+| fiv  |  civ  | encryted message |
++------+-------+------------------+
+|  16  |   2   |      variable    |
++------+-------+------------------+
+
+o key = md5(token + 0x01,0x01,0x01)
+o iv = md5(token + fiv + 0x02,0x02,0x02)
+o civ = iv[0:2]
+o algrithm: aes-gcm: E(key,iv[:12],p) D(key,iv[:12],c)
+
++-----+------+-----+-------+--------+------+
+| ver | cmd  | res | atype |  addr  | port |
++-----+------+-----+-------+--------+------+
+| 0x01|   1  | 0x00|   1   |variable|  2   |
++-----+------+-----+-------+--------+------+
+
+o ver: version 0x01
+o cmd: tcp 0x01, udp 0x02
+o atype: ipv4 0x01 daemon 0x03 ipv6 0x04
+o addr: ipv4 4bytes, ipv6 16bytes, daemon:len(1)+daemon
+o res: reserved, 0x00
+
+2. response
+
+failed:
+
+http/1.1 200 OK\r\n
+\r\n
+Hello,world\r\n
+
+
+successful:
+
++-----+-----+
+| ver | ret |
++-----+-----+
+| 0x01|  1  |
++-----+-----+
+
+o ver: version 0x01
+o ret: 0x00 successful, 0x01 common failed
+
+3. Default Password: erproxy

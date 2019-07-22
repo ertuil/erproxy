@@ -1,11 +1,11 @@
 package core
 
 import (
-	"net"
-	"log"
-	"strings"
 	"erproxy/conf"
 	"erproxy/header"
+	"log"
+	"net"
+	"strings"
 )
 
 // ResultStatus ,
@@ -13,33 +13,42 @@ type ResultStatus int
 
 const (
 	// Direct .
-	Direct ResultStatus = iota 
+	Direct ResultStatus = iota
 	// Block .
-	Block	
-	// Proxy .				
+	Block
+	// Proxy .
 	Proxy
 )
 
 func getOutBound(ad header.AddrInfo) Outbound {
-	from, host, port, _ ,_ := ad.GetInfo()
+	from, host, port, _, _ := ad.GetInfo()
 	var ob Outbound
-	name,c := route(ad)
-	switch(c.Type) {
-	case "socks": ob = new(sockbound)
-	case "http": ob =  new(httpbound)
-	case "free": ob = new(freebound)
-	case "block": ob = new(blockbound)
-	default :  ob = new(blockbound);name="block";c=conf.OutBound{Type: "block"}
+	name, c := route(ad)
+	switch c.Type {
+	case "socks":
+		ob = new(sockbound)
+	case "http":
+		ob = new(httpbound)
+	case "sutp":
+		ob = new(sutpbound)
+	case "free":
+		ob = new(freebound)
+	case "block":
+		ob = new(blockbound)
+	default:
+		ob = new(blockbound)
+		name = "block"
+		c = conf.OutBound{Type: "block"}
 	}
-	log.Println("Route: from",from,"to",net.JoinHostPort(host, port),"via",name)
-	ob.init(name,c)
+	log.Println("Route: from", from, "to", net.JoinHostPort(host, port), "via", name)
+	ob.init(name, c)
 	return ob
 }
 
-func route(ad header.AddrInfo) (string,conf.OutBound) {
+func route(ad header.AddrInfo) (string, conf.OutBound) {
 
-	for rule,policy := range(conf.CC.Routes.Route) {
-		if routeMatch(ad,rule) {
+	for rule, policy := range conf.CC.Routes.Route {
+		if routeMatch(ad, rule) {
 			return getPolicy(policy)
 		}
 	}
@@ -48,28 +57,27 @@ func route(ad header.AddrInfo) (string,conf.OutBound) {
 
 func routeMatch(ad header.AddrInfo, rule string) bool {
 	from, host, port, atype, _ := ad.GetInfo()
-	testips := make([]net.IP,0)
+	testips := make([]net.IP, 0)
 
 	if atype == 0x01 || atype == 0x04 {
 		t := net.ParseIP(host)
 		if t != nil {
-			testips = append(testips,t)
+			testips = append(testips, t)
 		}
 	} else {
-		ts,err := net.LookupHost(host)
+		ts, err := net.LookupHost(host)
 		if err == nil {
-			for _,v := range(ts) {
+			for _, v := range ts {
 				t := net.ParseIP(v)
 				if t != nil {
-					testips = append(testips,t)
+					testips = append(testips, t)
 				}
 			}
 		}
 	}
 
-
 	// Interface route
-	ruleFrom := strings.Split(rule,"@")
+	ruleFrom := strings.Split(rule, "@")
 	if len(ruleFrom) >= 2 {
 		rule = ruleFrom[0]
 	}
@@ -80,7 +88,7 @@ func routeMatch(ad header.AddrInfo, rule string) bool {
 	// IP route
 	ruleIP := net.ParseIP(rule)
 	if ruleIP != nil {
-		for _,v := range(testips) {
+		for _, v := range testips {
 			if v.Equal(ruleIP) {
 				return true
 			}
@@ -89,9 +97,9 @@ func routeMatch(ad header.AddrInfo, rule string) bool {
 	}
 
 	// CIDR route
-	ruleIP,ruleCIDR,err := net.ParseCIDR(rule)
+	ruleIP, ruleCIDR, err := net.ParseCIDR(rule)
 	if err == nil {
-		for _,v := range(testips) {
+		for _, v := range testips {
 			if ruleCIDR.Contains(v) {
 				return true
 			}
@@ -100,22 +108,22 @@ func routeMatch(ad header.AddrInfo, rule string) bool {
 	}
 
 	// port route
-	if strings.Contains(rule,"port:") {
+	if strings.Contains(rule, "port:") {
 		if rule[5:] == port {
 			return true
 		}
 	}
 
 	// Daemon route
-	return strings.Contains(host,rule)
+	return strings.Contains(host, rule)
 }
 
-func getPolicy(v string) (string,conf.OutBound) {
+func getPolicy(v string) (string, conf.OutBound) {
 
-	for n,c := range(conf.CC.OutBound) {
+	for n, c := range conf.CC.OutBound {
 		if n == v {
-			return n,c
+			return n, c
 		}
 	}
-	return "block",conf.OutBound{Type: "block"}
+	return "block", conf.OutBound{Type: "block"}
 }
