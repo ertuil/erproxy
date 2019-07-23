@@ -1,6 +1,6 @@
 # erproxy
 
-基于 golang 的多级 socks-tls、http(s)、sutp（自有协议） 代理。
+基于 golang 的多级 socks-tls、http(s)、sutp（自有协议）代理。
 
 ## Install
 
@@ -37,6 +37,7 @@ in:  # Inbounds
     port: "8080"
   b:
     type: "socks"
+    udp: "8082" # default udp port
     addr: "127.0.0.1"
     port: "8081"
     tls:
@@ -90,11 +91,13 @@ routes:
 
 ## Todo
 
-* socks5: udp associate \ bind command
+反向代理和UDP的完整支持
 
 ## Notice
-在 http/https 代理协议下访问 http 站点请使用强制 connect 方式连接。
+
+1. 在 http/https 代理协议下访问 http 站点请使用强制 connect 方式连接。
+2. socks inbound, sutp inbound,sutp outbound, free outbound 的 udp 没有经过测试。
 
 ## SUTP
 
-一种自由代理协议，实现 1RTT 完成信道建立可能比 socks 具有更好性能和较高混淆特性。
+一种自由代理协议，实现 1RTT 完成信道建立可能比 socks 具有更好性能和较好混淆特性。
