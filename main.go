@@ -74,20 +74,7 @@ func main() {
 			ib = new(core.SUTPServer)
 		}
 		sw.Add(1)
-		go InBoundServerRun(n, ib, c)
+		go core.InBoundServerRun(n, ib, c)
 	}
 	sw.Wait()
-}
-
-// InBoundServerRun run inbound servers
-func InBoundServerRun(name string, ib core.Inbound, c conf.InBound) {
-	l := ib.Init(name, c)
-	for {
-		client, err := l.Accept()
-		if err != nil {
-			log.Panic(err)
-		}
-		go ib.Handle(client)
-	}
-	sw.Done()
 }

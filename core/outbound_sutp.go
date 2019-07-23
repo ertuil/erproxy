@@ -55,14 +55,31 @@ func (sb *sutpbound) start(ad header.AddrInfo) bool {
 	}
 
 	sb.server = server
-
 	_, host, port, atype, cmd := ad.GetInfo()
 
 	var ip []byte
-	if atype == 0x01 || atype == 0x04 {
+	if atype == 0x01 {
 		t := net.ParseIP(host)
-		ip, err = t.MarshalText()
-		if err != nil {
+		if t == nil {
+			log.Println("SUTP Client: Cannot marshal ip")
+			server.Close()
+			return false
+		}
+		ip = t.To4()
+		if ip == nil {
+			log.Println("SUTP Client: Cannot marshal ip")
+			server.Close()
+			return false
+		}
+	} else if atype == 0x04 {
+		t := net.ParseIP(host)
+		if t == nil {
+			log.Println("SUTP Client: Cannot marshal ip")
+			server.Close()
+			return false
+		}
+		ip = t.To16()
+		if ip == nil {
 			log.Println("SUTP Client: Cannot marshal ip")
 			server.Close()
 			return false
@@ -104,7 +121,6 @@ func (sb *sutpbound) start(ad header.AddrInfo) bool {
 		log.Println("SUTP Client:", err)
 	}
 
-	//log.Println("[debug]SUTP Client:",resp[:n])
 	if len(resp) > 2 && resp[0] == 0x01 && resp[1] == 0x00 {
 		return true
 	}
