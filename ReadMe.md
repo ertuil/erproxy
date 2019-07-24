@@ -68,11 +68,18 @@ out:
     type: "block"
 
 routes:
-  default: "c"
+  default: "bl"
   route:
     baidu.com: "free"
-    google: "d"
-    twitter: "block"
+    google: "c"
+    twitter: "c"
+    
+balance:
+  bl:
+    type: "alive" # ping, weight, rr, random, alive
+    out:
+      free: 7
+      c: 3
 ```
 
 ## Route 
