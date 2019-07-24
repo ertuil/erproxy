@@ -1,0 +1,28 @@
+
+1. Client -> Server
+
++-------+-------+-------+
+|  ver  | type  | auth  |
++-------+-------+-------+
+|   1   |   1   |   16  |
++-------+-------+-------+
+
+ver: 0x01
+type: 0x00 control tcp, 0x01 normal tcp
+auth: md5(auth)
+
+2. Server -> Client && Client -> Server
+
++-------+-------+
+|  ver  |  msg  |
++-------+-------+
+| 0x01  |  1    |
++-------+-------+
+
+msg:
+
+o 0x00 Successful
+o 0x01 Auth failed
+o 0x02 Common Failed
+o 0x03 Request new tcp tunnel
+0 0x04 HeartBeat

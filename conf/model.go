@@ -50,4 +50,5 @@ type Config struct {
 	OutBound map[string]OutBound `yaml:"out"`
 	Balance  map[string]Balance  `yaml:"balance"`
 	Routes   Routes              `yaml:"routes"`
+	Nat      Nat                 `yaml:"nat"`
 }

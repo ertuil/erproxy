@@ -4,6 +4,7 @@ import (
 	"erproxy/conf"
 	"erproxy/core"
 	"erproxy/core/balance"
+	"erproxy/core/nat"
 	"flag"
 	"fmt"
 	"log"
@@ -78,6 +79,21 @@ func main() {
 		}
 	}()
 
+	// NAT
+	nat.InitNat(conf.CC.Nat)
+	for _, s := range nat.Servers {
+		sw.Add(1)
+		go s.Live()
+		go s.HeartBeat()
+	}
+
+	for _, c := range nat.Clients {
+		sw.Add(1)
+		go c.Link()
+		go c.HeartBeat()
+	}
+	// Inbound and OutBound
+
 	for n, c := range conf.CC.InBound {
 		var ib core.Inbound
 		if c.Type == "socks" {
@@ -91,4 +107,7 @@ func main() {
 		go core.InBoundServerRun(n, ib, c)
 	}
 	sw.Wait()
+	for {
+		time.Sleep(1 * time.Second)
+	}
 }
