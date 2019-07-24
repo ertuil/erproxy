@@ -33,28 +33,37 @@ func (ns *NatServer) Init(name string, c conf.NatServerConf) error {
 }
 
 func (ns *NatServer) Live() {
-	log.Println("111")
-	ns.GetConConn()
 
 	for {
-		log.Println(ns.conConn)
-		conn, err := ns.InListener.Accept()
-		if err != nil {
-			log.Println("Nat Server", err)
-			continue
-		}
 		if ns.conConn == nil {
-			log.Println("Nat Server", "233")
 			ns.GetConConn()
+			log.Println(ns.conConn)
+		} else {
+			log.Println(ns.conConn)
+			conn, err := ns.InListener.Accept()
+			if err != nil {
+				log.Println("Nat Server", err)
+				continue
+			}
+			if ns.conConn != nil {
+				go ns.NetServerHandle(conn)
+			} else {
+				conn.Close()
+			}
 		}
-		go ns.NetServerHandle(conn)
 	}
 }
 
 func (ns *NatServer) HeartBeat() {
 	for {
 		if ns.conConn != nil {
-			ns.conConn.Write([]byte{0x01, 0x04})
+			_, err := ns.conConn.Write([]byte{0x01, 0x04})
+			if err != nil {
+				if ns.conConn != nil {
+					ns.conConn.Close()
+				}
+				ns.conConn = nil
+			}
 		}
 		time.Sleep(time.Second * 8)
 	}
@@ -79,7 +88,10 @@ func (ns *NatServer) GetConConn() {
 		if isc {
 			ns.conConn = mnc
 		} else {
-			mnc.Close()
+			err := mnc.Close()
+			if err != nil {
+				continue
+			}
 		}
 	}
 	log.Println("NAT Server: Get control connection", ns.conConn)
@@ -137,8 +149,8 @@ func (ns *NatServer) NetServerHandle(conn net.Conn) {
 
 	defer nc.Close()
 
-	go io.Copy(conn, nc)
-	io.Copy(nc, conn)
+	go io.Copy(nc, conn)
+	io.Copy(conn, nc)
 }
 
 func (ns *NatServer) Core() (bool, net.Conn) {
@@ -148,6 +160,7 @@ func (ns *NatServer) Core() (bool, net.Conn) {
 	ns.conConn.Write([]byte{0x01, 0x03})
 	nc, err := ns.OutListener.Accept()
 	if err != nil {
+		log.Println("123")
 		return false, nil
 	}
 	ret, isc := ns.OutHandle(nc)

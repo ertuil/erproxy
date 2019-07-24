@@ -100,9 +100,10 @@ func (nc *NatClient) Handle() {
 	var b [1024]byte
 
 	for {
-		if tc == nil {
+		if nc.conConn == nil {
 			break
 		}
+
 		n, err := tc.Read(b[:])
 		if err != nil {
 			log.Println("Nat Client:", err)
@@ -121,7 +122,13 @@ func (nc *NatClient) Handle() {
 func (nc *NatClient) HeartBeat() {
 	for {
 		if nc.conConn != nil {
-			nc.conConn.Write([]byte{0x01, 0x04})
+			_, ret := nc.conConn.Write([]byte{0x01, 0x04})
+			if ret != nil {
+				if nc.conConn != nil {
+					nc.conConn.Close()
+				}
+				nc.conConn = nil
+			}
 		}
 		time.Sleep(time.Second * 8)
 	}
@@ -133,15 +140,16 @@ func (nc *NatClient) NewTunnel() {
 		log.Println("Nat Client:", err)
 		return
 	}
+	defer a.Close()
+
 	b, err := nc.NatClientGetConn(nc.c.OutAddr, nc.c.OutPort, nc.c.OutTLS)
 	if err != nil {
 		log.Println("Nat Client:", err)
 		return
 	}
-	nc.NatClientAuth(a, 0x01)
-
-	defer a.Close()
 	defer b.Close()
+
+	nc.NatClientAuth(a, 0x01)
 
 	go io.Copy(a, b)
 	io.Copy(b, a)
