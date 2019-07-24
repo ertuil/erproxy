@@ -1,7 +1,6 @@
 package header
 
 import (
-	"log"
 	"net"
 )
 
@@ -34,7 +33,6 @@ func (ad *AddrInfo) SetInfo(from, host, port string, atype, cmd byte) {
 func HostCheck(host string) byte {
 
 	ip := net.ParseIP(host)
-	log.Println("[debug] ip: ", ip.To4(), len(ip))
 	if ip != nil {
 		if ip.To4() != nil {
 			return 0x01

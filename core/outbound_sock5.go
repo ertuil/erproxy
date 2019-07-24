@@ -43,7 +43,6 @@ func (sb *sockbound) start(ad header.AddrInfo) bool {
 	}
 
 	if err != nil {
-		server.Close()
 		log.Println(err)
 		return false
 	}
@@ -71,21 +70,21 @@ func (sb *sockbound) close() {
 func Sock5Client(c conf.OutBound, server net.Conn, host, port string, atype byte) bool {
 	ret := Socks5HandShake(c, server)
 	if ret == false {
-		log.Println("can not connect to the next hop")
+		log.Println("Socks Client: can not connect to the next hop")
 		return false
 	}
 
 	if isOutAuth(c) {
 		ret := Socks5ClientAuth(c, server)
 		if ret == false {
-			log.Println("cancel connection")
+			log.Println("Socks Client: Canceling connection")
 			return false
 		}
 	}
 
 	ret = Socks5ClientConnect(server, host, port, atype)
 	if ret == false {
-		log.Println("cancel connection")
+		log.Println("Socks Client: Canceling connection")
 		return false
 	}
 
@@ -104,7 +103,7 @@ func Socks5HandShake(c conf.OutBound, server net.Conn) bool {
 			return false
 		}
 		if b[0] != 0x05 && b[1] != 0x02 {
-			log.Println("can not read handshake response")
+			log.Println("Socks client: Can not read handshake response")
 			return false
 		}
 		return true
@@ -118,7 +117,7 @@ func Socks5HandShake(c conf.OutBound, server net.Conn) bool {
 		return false
 	}
 	if b[0] != 0x05 && b[1] != 0x00 {
-		log.Println("can not read handshake response")
+		log.Println("Socks Client: Can not read handshake response")
 		return false
 	}
 	return true
@@ -147,19 +146,19 @@ func Socks5ClientAuth(c conf.OutBound, server net.Conn) bool {
 	}
 
 	if r[0] != 0x01 {
-		log.Println("cannot read auth response")
+		log.Println("Socks Client:Cannot read auth response")
 		return false
 	}
 
 	if r[1] == 0x01 {
-		log.Println("username or password error")
+		log.Println("Socks Client: Username or password error")
 		return false
 	}
 
 	if r[1] == 0x00 {
 		return true
 	}
-	log.Println("cannot read auth response")
+	log.Println("Socks Client: Cannot read auth response")
 	return false
 }
 
@@ -173,26 +172,26 @@ func Socks5ClientConnect(server net.Conn, host, port string, atype byte) bool {
 	if atype == 0x01 {
 		t := net.ParseIP(host)
 		if t == nil {
-			log.Println("SUTP Client: Cannot marshal ip")
+			log.Println("Socks Client: Cannot marshal ip")
 			server.Close()
 			return false
 		}
 		ip = t.To4()
 		if ip == nil {
-			log.Println("SUTP Client: Cannot marshal ip")
+			log.Println("Socks Client: Cannot marshal ip")
 			server.Close()
 			return false
 		}
 	} else if atype == 0x04 {
 		t := net.ParseIP(host)
 		if t == nil {
-			log.Println("SUTP Client: Cannot marshal ip")
+			log.Println("Socks Client: Cannot marshal ip")
 			server.Close()
 			return false
 		}
 		ip = t.To16()
 		if ip == nil {
-			log.Println("SUTP Client: Cannot marshal ip")
+			log.Println("Socks Client: Cannot marshal ip")
 			server.Close()
 			return false
 		}

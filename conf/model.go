@@ -37,10 +37,17 @@ type OutBound struct {
 	UseTLS bool              `yaml:"tls"`
 }
 
+// Balance is Balance
+type Balance struct {
+	Type     string         `yaml:"type"`
+	OutBound map[string]int `yaml:"out"`
+}
+
 // Config is a config
 type Config struct {
 	Log      string              `yaml:"log"`
 	InBound  map[string]InBound  `yaml:"in"`
 	OutBound map[string]OutBound `yaml:"out"`
+	Balance  map[string]Balance  `yaml:"balance"`
 	Routes   Routes              `yaml:"routes"`
 }

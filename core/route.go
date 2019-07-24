@@ -2,6 +2,7 @@ package core
 
 import (
 	"erproxy/conf"
+	"erproxy/core/balance"
 	"erproxy/header"
 	"log"
 	"net"
@@ -120,10 +121,16 @@ func routeMatch(ad header.AddrInfo, rule string) bool {
 
 func getPolicy(v string) (string, conf.OutBound) {
 
+	ret := balance.GetBalance(v)
+	if ret != "" {
+		v = ret
+	}
+
 	for n, c := range conf.CC.OutBound {
 		if n == v {
 			return n, c
 		}
 	}
+
 	return "block", conf.OutBound{Type: "block"}
 }

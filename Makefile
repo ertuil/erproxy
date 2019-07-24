@@ -1,5 +1,5 @@
 build:
-	make clean & make darwin && cd bin && ./erproxy-darwin
+	make clean & make darwin
 
 .PHONY: clean darwin linux windows build run cp docker
 

@@ -3,12 +3,14 @@ package main
 import (
 	"erproxy/conf"
 	"erproxy/core"
+	"erproxy/core/balance"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"sync"
+	"time"
 )
 
 var (
@@ -63,6 +65,18 @@ func main() {
 	setLog(logfile)
 
 	log.Printf("Erproxy start, config file: %v", conffile)
+
+	// Init Balances
+
+	balance.InitBalance()
+	balance.CheckBalance()
+	ti := time.NewTicker(300 * time.Second)
+
+	go func() {
+		for range ti.C {
+			balance.CheckBalance()
+		}
+	}()
 
 	for n, c := range conf.CC.InBound {
 		var ib core.Inbound
