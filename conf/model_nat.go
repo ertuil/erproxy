@@ -18,7 +18,7 @@ type NatClientConf struct {
 	InTLS   bool   `yaml:"intls"`
 	OutTLS  bool   `yaml:"outtls"`
 	Auth    string `yaml:"auth"`
-	beat    int    `yaml:"beat"`
+	Beat    int    `yaml:"beat"`
 }
 
 type Nat struct {

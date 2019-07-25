@@ -39,7 +39,7 @@ func setLog(logfile string) {
 		log.SetOutput(f)
 	}
 	log.SetPrefix("[erproxy]")
-	log.SetFlags(log.LstdFlags)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
 func main() {
@@ -83,13 +83,13 @@ func main() {
 	nat.InitNat(conf.CC.Nat)
 	for _, s := range nat.Servers {
 		sw.Add(1)
-		go s.Live()
-		go s.HeartBeat()
+		go s.OutLink()
+		go s.InLink()
 	}
 
 	for _, c := range nat.Clients {
 		sw.Add(1)
-		go c.Link()
+		go c.InLink()
 		go c.HeartBeat()
 	}
 	// Inbound and OutBound
